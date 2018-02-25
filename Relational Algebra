@@ -1,0 +1,46 @@
+Relational Algebra (RA) is a formal language which  SQL and other database softwares.
+
+The following exercises illustrate the use of RA operators in the RA Workbench maintained by Professor Jun Yang.
+A link to the workbench documentation can be found here: https://users.cs.duke.edu/~junyang/radb/
+
+Relations used in the exercises (Link: https://lagunita.stanford.edu/c4x/DB/RA/asset/pizzadata.html )
+
+    Person(name, age, gender)       // name is a key
+    Frequents(name, pizzeria)       // [name,pizzeria] is a key
+    Eats(name, pizza)               // [name,pizza] is a key
+    Serves(pizzeria, pizza, price)  // [pizzeria,pizza] is a key
+    
+Q1 Find all pizzas eaten by at least one female over the age of 20. 
+
+\project_{pizza} (
+    (\select_{gender='female' and age >=20} Person)
+    \join
+    Eats)
+
+Q5 Find the names of all people who eat at least one pizza served by Dominos but who do not frequent Dominos.
+
+ \project_{name} (
+         ((\project_{name} Frequents)
+         \diff
+         (\project_{name} \select_{pizzeria = 'Dominos'} Frequents)) 
+    \join 
+         (\select_{pizzeria='Dominos'} Serves
+         \join Eats))
+         
+Q8 Find all pizzerias that serve only pizzas eaten by people over 30. 
+
+\project_{pizzeria} (
+         Frequents \join (
+            \select_{age>30} Person)) 
+            \diff \project_{pizzeria}(\project_{pizza}(\select_{age<30} Person \join Eats) 
+            \diff \project_{pizza}(\select_{age>30} Person \join Eats)\join Serves)
+         
+Q9 Find all pizzerias that serve every pizza eaten by people over 30. 
+
+\project_{pizzeria} Serves \diff
+    \project_{pizzeria} (
+            (\project_{pizza}(\select_{age>30} Person \join Eats)
+                \cross
+            (\project_{pizzeria} Serves))
+        \diff
+            (\project_{pizza, pizzeria}((\select_{age>30} Person \join Eats) \join Serves)))
